@@ -2,6 +2,15 @@ from PIL import Image
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
+img = Image.open("image/cat.jpg")
+red, green, blue = img.split()
+zeroed_band = red.point(lambda _: 0)
+red_merge = Image.merge('RGB', (red, zeroed_band, zeroed_band))
+red_merge.save('image/cat_red_merge.jpg')
+green_merge = Image.merge('RGB', (zeroed_band, green, zeroed_band))
+green_merge.save('image/cat_green_merge.jpg')
+blue_merge = Image.merge('RGB', (zeroed_band, zeroed_band, blue))
+blue_merge.save('image/cat_blue_merge.jpg')
 
 class MainWin(QWidget):
     def __init__(self):
@@ -9,21 +18,12 @@ class MainWin(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.resize(280, 300)
-
-        img = Image.open("image/cat.jpg")
-        red, green, blue = img.split()
-        zeroed_band = red.point(lambda _: 0)
-        red_merge = Image.merge('RGB', (red, zeroed_band, zeroed_band))
-        red_merge.save('image/cat_red_merge.jpg')
-        green_merge = Image.merge('RGB', (zeroed_band, green, zeroed_band))
-        green_merge.save('image/cat_green_merge.jpg')
-        blue_merge = Image.merge('RGB', (zeroed_band, zeroed_band, blue))
-        blue_merge.save('image/cat_blue_merge.jpg')
+        self.setWindowTitle('Cat')
 
         self.label = QLabel()
-        btn_rotate_clockwise = QPushButton('Повернуть по часовой стрелке')
-        btn_rotate_counter_clockwise = QPushButton('Повернуть против часовой стрелке')
+
+        btn_rotate_clockwise = QPushButton('По часовой стрелке')
+        btn_rotate_counter_clockwise = QPushButton('Против часовой стрелки')
         btn_red = QPushButton('R')
         btn_green = QPushButton('G')
         btn_blue = QPushButton('B')
@@ -35,6 +35,12 @@ class MainWin(QWidget):
         btn_blue.clicked.connect(self.blue_colored)
         btn_all.clicked.connect(self.all_colored)
 
+        self.slider = QSlider()
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(256)
+        self.slider.setValue(256)
+        self.slider.valueChanged.connect(self.make_transparent)
+
         self.transform = QTransform()
         self.rotate = 0
         self.transform.rotate(self.rotate)
@@ -44,25 +50,26 @@ class MainWin(QWidget):
         self.pixmap = self.pixmap_empty.scaled(200, 200)
         self.label.setPixmap(self.pixmap)
 
-        self.main_l = QHBoxLayout()
-        self.v_l1 = QVBoxLayout()
-        self.v_l1.addSpacing(15)
-        self.v_l1.setSpacing(25)
-        self.v_l2 = QVBoxLayout()
-        self.h_l1 = QHBoxLayout()
-        self.v_l1.addWidget(btn_red)
-        self.v_l1.addWidget(btn_green)
-        self.v_l1.addWidget(btn_blue)
-        self.v_l1.addWidget(btn_all)
-        self.v_l1.addStretch()
-        self.v_l2.addWidget(self.label)
-        self.v_l2.addStretch()
-        self.main_l.addWidget(btn_rotate_clockwise)
-        self.main_l.addWidget(btn_rotate_counter_clockwise)
-        self.main_l.addLayout(self.v_l1)
-        self.main_l.addLayout(self.v_l2)
-        self.main_l.addLayout(self.h_l1)
-        self.setLayout(self.main_l)
+        self.transparent = Image.open("image/cat.jpg")
+
+        main_l = QHBoxLayout()
+        v_l1 = QVBoxLayout()
+        v_l2 = QVBoxLayout()
+        v_l3 = QVBoxLayout()
+        v_l1.addWidget(btn_red)
+        v_l1.addWidget(btn_green)
+        v_l1.addWidget(btn_blue)
+        v_l1.addWidget(btn_all)
+        v_l1.addStretch()
+        v_l2.addWidget(self.label)
+        v_l2.addStretch()
+        v_l3.addWidget(self.slider)
+        v_l2.addWidget(btn_rotate_counter_clockwise)
+        v_l1.addWidget(btn_rotate_clockwise)
+        main_l.addLayout(v_l1)
+        main_l.addLayout(v_l2)
+        main_l.addLayout(v_l3)
+        self.setLayout(main_l)
 
     def rotate_clockwise(self):
         clockwise_rotation = self.rotate
@@ -85,7 +92,9 @@ class MainWin(QWidget):
     def red_colored(self):
         pixmap_red = QPixmap()
         pixmap_red.load("image/cat_red_merge.jpg")
-        pixmap_red_scaled = pixmap_red.scaled(100, 100)
+        self.transparent = Image.open("image/cat_red_merge.jpg")
+        self.slider.setValue(256)
+        pixmap_red_scaled = pixmap_red.scaled(200, 200)
         self.pixmap.swap(pixmap_red_scaled)
         self.label.setPixmap(self.pixmap)
         red_rotation = self.rotate
@@ -99,7 +108,9 @@ class MainWin(QWidget):
     def green_colored(self):
         pixmap_green = QPixmap()
         pixmap_green.load("image/cat_green_merge.jpg")
-        pixmap_green_scaled = pixmap_green.scaled(100, 100)
+        self.transparent = Image.open("image/cat_green_merge.jpg")
+        self.slider.setValue(256)
+        pixmap_green_scaled = pixmap_green.scaled(200, 200)
         self.pixmap.swap(pixmap_green_scaled)
         self.label.setPixmap(self.pixmap)
         green_rotation = self.rotate
@@ -113,7 +124,9 @@ class MainWin(QWidget):
     def blue_colored(self):
         pixmap_blue = QPixmap()
         pixmap_blue.load("image/cat_blue_merge.jpg")
-        pixmap_blue_scaled = pixmap_blue.scaled(100, 100)
+        self.transparent = Image.open("image/cat_blue_merge.jpg")
+        self.slider.setValue(256)
+        pixmap_blue_scaled = pixmap_blue.scaled(200, 200)
         self.pixmap.swap(pixmap_blue_scaled)
         self.label.setPixmap(self.pixmap)
         blue_rotation = self.rotate
@@ -127,7 +140,9 @@ class MainWin(QWidget):
     def all_colored(self):
         pixmap_og = QPixmap()
         pixmap_og.load("image/cat.jpg")
-        pixmap_og_scaled = pixmap_og.scaled(100, 100)
+        self.transparent = Image.open("image/cat.jpg")
+        self.slider.setValue(256)
+        pixmap_og_scaled = pixmap_og.scaled(200, 200)
         self.pixmap.swap(pixmap_og_scaled)
         self.label.setPixmap(self.pixmap)
         all_rotation = self.rotate
@@ -135,6 +150,23 @@ class MainWin(QWidget):
             self.rotate = 0
             all_rotation = self.rotate
             self.transform.rotate(all_rotation)
+        transformed_pixmap = self.pixmap.transformed(self.transform)
+        self.label.setPixmap(transformed_pixmap)
+
+    def make_transparent(self):
+        size = self.slider.value()
+        self.transparent.putalpha(size)
+        self.transparent.save('image/cat_all_transparent.png')
+        pixmap_transparent = QPixmap()
+        pixmap_transparent.load('image/cat_all_transparent.png')
+        pixmap_transparent_scaled = pixmap_transparent.scaled(200, 200)
+        self.pixmap.swap(pixmap_transparent_scaled)
+        self.label.setPixmap(self.pixmap)
+        transparent_rotation = self.rotate
+        if self.rotate == transparent_rotation:
+            self.rotate = 0
+            transparent_rotation = self.rotate
+            self.transform.rotate(transparent_rotation)
         transformed_pixmap = self.pixmap.transformed(self.transform)
         self.label.setPixmap(transformed_pixmap)
 
