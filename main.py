@@ -156,9 +156,9 @@ class MainWin(QWidget):
     def make_transparent(self):
         size = self.slider.value()
         self.transparent.putalpha(size)
-        self.transparent.save('image/cat_all_transparent.png')
+        self.transparent.save('image/cat_transparent.png')
         pixmap_transparent = QPixmap()
-        pixmap_transparent.load('image/cat_all_transparent.png')
+        pixmap_transparent.load('image/cat_transparent.png')
         pixmap_transparent_scaled = pixmap_transparent.scaled(200, 200)
         self.pixmap.swap(pixmap_transparent_scaled)
         self.label.setPixmap(self.pixmap)
