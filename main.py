@@ -1,16 +1,9 @@
 from PIL import Image
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
+import os
+import sys
 
-img = Image.open("image/cat.jpg")
-red, green, blue = img.split()
-zeroed_band = red.point(lambda _: 0)
-red_merge = Image.merge('RGB', (red, zeroed_band, zeroed_band))
-red_merge.save('image/cat_red_merge.jpg')
-green_merge = Image.merge('RGB', (zeroed_band, green, zeroed_band))
-green_merge.save('image/cat_green_merge.jpg')
-blue_merge = Image.merge('RGB', (zeroed_band, zeroed_band, blue))
-blue_merge.save('image/cat_blue_merge.jpg')
 
 class MainWin(QWidget):
     def __init__(self):
@@ -19,15 +12,18 @@ class MainWin(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Cat')
+        self.resize(380, 260)
 
         self.label = QLabel()
 
+        open_btn = QPushButton('Открыть файл')
         btn_rotate_clockwise = QPushButton('По часовой стрелке')
         btn_rotate_counter_clockwise = QPushButton('Против часовой стрелки')
         btn_red = QPushButton('R')
         btn_green = QPushButton('G')
         btn_blue = QPushButton('B')
         btn_all = QPushButton('ALL')
+        open_btn.clicked.connect(self.open)
         btn_rotate_clockwise.clicked.connect(self.rotate_clockwise)
         btn_rotate_counter_clockwise.clicked.connect(self.rotate_counter_clockwise)
         btn_red.clicked.connect(self.red_colored)
@@ -46,11 +42,6 @@ class MainWin(QWidget):
         self.transform.rotate(self.rotate)
 
         self.pixmap_empty = QPixmap()
-        self.pixmap_empty.load("image/cat.jpg")
-        self.pixmap = self.pixmap_empty.scaled(200, 200)
-        self.label.setPixmap(self.pixmap)
-
-        self.transparent = Image.open("image/cat.jpg")
 
         main_l = QHBoxLayout()
         v_l1 = QVBoxLayout()
@@ -65,11 +56,37 @@ class MainWin(QWidget):
         v_l2.addStretch()
         v_l3.addWidget(self.slider)
         v_l2.addWidget(btn_rotate_counter_clockwise)
+        v_l1.addWidget(open_btn)
         v_l1.addWidget(btn_rotate_clockwise)
         main_l.addLayout(v_l1)
         main_l.addLayout(v_l2)
         main_l.addLayout(v_l3)
         self.setLayout(main_l)
+
+    def open(self):
+        file = QFileDialog.getOpenFileName(self, 'Выберите файл')[0]
+        if file:
+            img = Image.open(file)
+            img.save('image/cat.jpg')
+            red, green, blue = img.split()
+            zeroed_band = red.point(lambda _: 0)
+            red_merge = Image.merge('RGB', (red, zeroed_band, zeroed_band))
+            red_merge.save('image/cat_red_merge.jpg')
+            green_merge = Image.merge('RGB', (zeroed_band, green, zeroed_band))
+            green_merge.save('image/cat_green_merge.jpg')
+            blue_merge = Image.merge('RGB', (zeroed_band, zeroed_band, blue))
+            blue_merge.save('image/cat_blue_merge.jpg')
+
+            self.pixmap_empty.load('image/cat.jpg')
+            self.pixmap = self.pixmap_empty.scaled(200, 200)
+            self.label.setPixmap(self.pixmap)
+
+            self.transparent = Image.open('image/cat.jpg')
+        else:
+            message = QMessageBox()
+            message.setWindowTitle('Инфо')
+            message.setText('Файл не выбран')
+            message.exec()
 
     def rotate_clockwise(self):
         clockwise_rotation = self.rotate
