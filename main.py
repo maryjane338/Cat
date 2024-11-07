@@ -66,30 +66,31 @@ class MainWin(QWidget):
     def open(self):
         file = QFileDialog.getOpenFileName(self, 'Выберите файл')[0]
         if file:
-            if os.path.isfile('image/cat.jpg'):
+            if os.path.exists('.../image/cat.jpg') is True:
                 os.remove('image/cat.jpg')
 
-                img = Image.open(file)
-                new_size = (300, 300)
-                resized_image = img.resize(new_size)
-                resized_image.save('image/cat.jpg')
-                red, green, blue = img.split()
-                zeroed_band = red.point(lambda _: 0)
-                red_merge = Image.merge('RGB', (red, zeroed_band, zeroed_band))
-                resized_image_red_merge = red_merge.resize(new_size)
-                resized_image_red_merge.save('image/cat_red_merge.jpg')
-                green_merge = Image.merge('RGB', (zeroed_band, green, zeroed_band))
-                resized_image_green_merge = green_merge.resize(new_size)
-                resized_image_green_merge.save('image/cat_green_merge.jpg')
-                blue_merge = Image.merge('RGB', (zeroed_band, zeroed_band, blue))
-                resized_image_blue_merge = blue_merge.resize(new_size)
-                resized_image_blue_merge.save('image/cat_blue_merge.jpg')
+            img = Image.open(file)
+            new_size = (200, 200)
+            resized_image = img.resize(new_size)
+            resized_image.save('image/cat.jpg')
+            red, green, blue = img.split()
+            zeroed_band = red.point(lambda _: 0)
+            red_merge = Image.merge('RGB', (red, zeroed_band, zeroed_band))
+            resized_image_red_merge = red_merge.resize(new_size)
+            resized_image_red_merge.save('image/cat_red_merge.jpg')
+            green_merge = Image.merge('RGB', (zeroed_band, green, zeroed_band))
+            resized_image_green_merge = green_merge.resize(new_size)
+            resized_image_green_merge.save('image/cat_green_merge.jpg')
+            blue_merge = Image.merge('RGB', (zeroed_band, zeroed_band, blue))
+            resized_image_blue_merge = blue_merge.resize(new_size)
+            resized_image_blue_merge.save('image/cat_blue_merge.jpg')
 
-                self.pixmap_empty.load('image/cat.jpg')
-                self.pixmap = self.pixmap_empty.scaled(200, 200)
-                self.label.setPixmap(self.pixmap)
 
-                self.transparent = Image.open('image/cat.jpg')
+            self.pixmap_empty.load('image/cat.jpg')
+            self.pixmap = self.pixmap_empty.scaled(200, 200)
+            self.label.setPixmap(self.pixmap)
+
+            self.transparent = Image.open('image/cat.jpg')
         else:
             message = QMessageBox()
             message.setWindowTitle('Инфо')
